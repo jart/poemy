@@ -8,6 +8,7 @@ r"""
 """
 
 import marshal
+from itertools import product
 
 from contracts import contract
 
@@ -126,61 +127,43 @@ class DB(object):
 
 
 @contract
-def wordsound(word, full=False):
+def wordsounds(word):
     r"""Returns how a word is pronounced
 
     For example::
 
-        >>> wordsound('adult')
-        'AH D AH L T'
-        >>> wordsound('adult', full=True)
+        >>> wordsounds('dog')
+        ['D AO G']
+        >>> wordsounds('adult')
         ['AH D AH L T', 'AE D AH L T']
-        >>> wordsound('created')
-        'K R IY EY T AH D'
-        >>> wordsound('created', full=True)
-        ['K R IY EY T AH D', 'K R IY EY T IH D']
 
     :param word: Word to look up
     :type word:  word
-    :param full: Return list instead that includes alternative sounds
-    :type full:  bool
-    :return:     String of phonemes separated by spaces
-    :rtype:      sound | list[>=1](sound)
+    :return:     List of strings of phonemes separated by spaces
+    :rtype:      list[>=1](sound)
     """
-    if full:
-        return [db.sound[word]] + db.altsound.get(word, [])
-    else:
-        return db.sound[word]
+    return db.sounds[word]
 
 
 @contract
-def wordmeter(word, full=False):
+def wordmeters(word):
     r"""Returns how each syllable is emphasized
 
     For example::
 
-        >>> wordmeter('adulterate')
-        '0101'
-        >>> wordmeter('adult')
-        '01'
-        >>> wordmeter('adult', full=True)
+        >>> wordmeters('adulterate')
+        ['0101']
+        >>> wordmeters('adult')
         ['01', '10']
-        >>> wordmeter('created')
-        '010'
-        >>> wordmeter('created', full=True)
+        >>> wordmeters('created')
         ['010']
 
     :param word: Word to look up
     :type word:  word
-    :param full: Return list instead that includes alternative meters
-    :type full:  bool
-    :return:     String of 1's and 0's to denote emphasis of syllables
-    :rtype:      meter | list[>=1](meter)
+    :return:     List of strings of 1/0's to denote emphasis of syllables
+    :rtype:      list[>=1](meter)
     """
-    if full:
-        return [db.meter[word]] + db.altmeter.get(word, [])
-    else:
-        return db.meter[word]
+    return db.meters[word]
 
 
 @contract
@@ -218,25 +201,6 @@ def soundparts(sound):
 
 
 @contract
-def wordparts(word):
-    r"""Get sound of word broken down into syllables
-
-    This function is equivalent to ``soundparts(wordsound(word))``.
-
-    For example::
-
-        >>> wordparts('better')
-        ('B', ['EH T', 'ER'])
-
-    :param word: Word to look up
-    :type word:  word
-    :return:     Onset consonant (if any) and list of phonemes each syllable
-    :rtype:      tuple(str, list[>=1](sound))
-    """
-    return soundparts(wordsound(word))
-
-
-@contract
 def is_rhyme(word1, word2):
     r"""Test if last syllable of each word is pronounced the same
 
@@ -256,10 +220,11 @@ def is_rhyme(word1, word2):
     :return:      True if it rhymes
     :rtype:       bool
     """
-    wp1 = wordparts(word1)
-    wp2 = wordparts(word2)
-    return (word1 in db.rhyme[wp2[1][-1]] or
-            word2 in db.rhyme[wp1[1][-1]])
+    for s1, s2 in product(wordsounds(word1), wordsounds(word2)):
+        p1, p2 = soundparts(s1), soundparts(s2)
+        if p1[1][-1] == p2[1][-1]:
+            return True
+    return False
 
 
 @contract
@@ -284,12 +249,14 @@ def is_frhyme(word1, word2):
     :return:      True if it rhymes in a 'feminine' manner
     :rtype:       bool
     """
-    wp1 = wordparts(word1)
-    wp2 = wordparts(word2)
-    return (len(wp1[1]) >= 2 and
-            len(wp2[1]) >= 2 and
-            (word1 in db.frhyme[wp2[1][-2] + ' ' + wp2[1][-1]] or
-             word2 in db.frhyme[wp1[1][-2] + ' ' + wp1[1][-1]]))
+    for s1, s2 in product(wordsounds(word1), wordsounds(word2)):
+        p1, p2 = soundparts(s1), soundparts(s2)
+        if (len(p1[1]) >= 2 and
+            len(p2[1]) >= 2 and
+            p1[1][-2] == p2[1][-2] and
+            p1[1][-1] == p2[1][-1]):
+            return True
+    return False
 
 
 db = DB()

@@ -8,9 +8,8 @@ from poemy import soundparts
 
 if __name__ == '__main__':
     db = {}
-    db['sound'] = {}          # delisted -> D IY L IH S T IH D
-    db['altsound'] = {}
-    db['meter'] = {}          # delisted -> 110
+    db['sounds'] = {}         # delisted -> ['D IY L IH S T IH D', ...]
+    db['meters'] = {}         # delisted -> ['110', ...]
     db['altmeter'] = {}
     db['rhyme'] = {}          # IH D -> wretched, winded, wielded, ...
     db['brhyme'] = {}         # IY -> regal, eagle, ...
@@ -31,23 +30,16 @@ if __name__ == '__main__':
         if not line or line.startswith(';;;'):
             continue
         word, pron = line.split('  ')
-        primary = True
         if word.endswith(')'):
-            primary = False
             word = word[:-3]
         word = word.lower().replace('_', ' ')
         pron = pron.strip()
         sound = re.sub(r'\d', '', pron)
         meter = re.sub(r'\D', '', pron).replace('2', '1')
-        if primary:
-            db['sound'][word] = sound
-            db['meter'][word] = meter
-        else:
-            db['altsound'].setdefault(word, []).append(sound)
-            db['altmeter'].setdefault(word, [])
-            if (meter != db['meter'][word] and
-                meter not in db['altmeter'][word]):
-                db['altmeter'][word].append(meter)
+        db['sounds'].setdefault(word, []).append(sound)
+        db['meters'].setdefault(word, [])
+        if meter not in db['meters'][word]:
+            db['meters'][word].append(meter)
         db['mets'].setdefault(meter, set()).add(word)
         db['sibs'].setdefault(len(meter), set()).add(word)
         snds = sound.split()

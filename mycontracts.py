@@ -34,4 +34,4 @@ def sound(sound):
         raise ValueError('sound is empty')
     if not set(sound.split()) <= poemy.phonemes:
         raise ValueError('sound contains invalid phonemes',
-                         sound.split() - poemy.phonemes)
+                         set(sound.split()) - poemy.phonemes)

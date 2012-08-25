@@ -13,10 +13,8 @@ Why will poemy be so awesome? Because it'll be able to generate poetry from a
 - **Any rhyming scheme**: like couplets, abab,
   [acab](http://en.wikipedia.org/wiki/A.C.A.B.), etc. It'll also be able to do
   feminine rhymes and repeat similar consonants for alliteration.
-
 - **Any meter or rhythm**: like iambic pentameter, trochaic tetrameter,
   anapestic trimeter, etc.
-
 - **Any style**. Poemy will be trained to be capable of picking words and
   sentence structures from various historical and contemporary styles. You
   want a Shakespearean sonnet? No problem. Some dark melancholic goth music
