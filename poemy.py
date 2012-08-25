@@ -204,6 +204,8 @@ def soundparts(sound):
 def is_rhyme(word1, word2):
     r"""Test if last syllable of each word is pronounced the same
 
+    This function takes into consideration various accents.
+
     For example::
 
         >>> is_rhyme('painted', 'acquainted')
@@ -230,6 +232,8 @@ def is_rhyme(word1, word2):
 @contract
 def is_frhyme(word1, word2):
     r"""Test if feminine rhyme (last two syllables pronounced the same)
+
+    This function takes into consideration various accents.
 
     For example::
 

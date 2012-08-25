@@ -13,11 +13,11 @@ if __name__ == '__main__':
     if sys.argv[1] == 'rhyme':
         longest = 0
         for word in sys.argv[2:]:
-            for sound in poemy.wordsound(word, full=True):
+            for sound in poemy.wordsounds(word):
                 onset, syls = poemy.soundparts(sound)
                 longest = max(longest, len(syls))
         for word in sys.argv[2:]:
-            for sound in poemy.wordsound(word, full=True):
+            for sound in poemy.wordsounds(word):
                 onset, syls = poemy.soundparts(sound)
                 line = "%15s" % (word)
                 line += " " * ((longest - len(syls)) * 10)
