@@ -167,6 +167,34 @@ def wordmeters(word):
 
 
 @contract
+def meterwords(meter):
+    r"""Return all words greater than one syllable compatible with meter
+
+    This function is memoized.
+
+    For example::
+
+        >>> 'adulterate' in meterwords('01' * 5)
+        True
+        >>> 'created' in meterwords('01' * 5)
+        True
+        >>> 'biggie' in meterwords('01' * 5)
+        False
+
+    :param meter: Meter to be consumed
+    :type meter:  meter
+    :return:      List of strings of 1/0's to denote emphasis of syllables
+    :rtype:       myset
+    """
+    if len(meter) <= 1:
+        return set()
+    happy = set()
+    for n in range(1, 5):
+        if len(rim) >= n:
+            happy |= poemy.db.mets[rim[:n]]
+
+
+@contract
 def soundparts(sound):
     r"""Break sound down into syllables
 
@@ -222,7 +250,11 @@ def is_rhyme(word1, word2):
     :return:      True if it rhymes
     :rtype:       bool
     """
-    for s1, s2 in product(wordsounds(word1), wordsounds(word2)):
+    try:
+        ws1, ws2 = wordsounds(word1), wordsounds(word2)
+    except KeyError:
+        return False
+    for s1, s2 in product(ws1, ws2):
         p1, p2 = soundparts(s1), soundparts(s2)
         if p1[1][-1] == p2[1][-1]:
             return True
@@ -253,7 +285,11 @@ def is_frhyme(word1, word2):
     :return:      True if it rhymes in a 'feminine' manner
     :rtype:       bool
     """
-    for s1, s2 in product(wordsounds(word1), wordsounds(word2)):
+    try:
+        ws1, ws2 = wordsounds(word1), wordsounds(word2)
+    except KeyError:
+        return False
+    for s1, s2 in product(ws1, ws2):
         p1, p2 = soundparts(s1), soundparts(s2)
         if (len(p1[1]) >= 2 and
             len(p2[1]) >= 2 and

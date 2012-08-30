@@ -35,3 +35,9 @@ def sound(sound):
     if not set(sound.split()) <= poemy.phonemes:
         raise ValueError('sound contains invalid phonemes',
                          set(sound.split()) - poemy.phonemes)
+
+
+@new_contract
+def myset(var):
+    if not isinstance(var, set):
+        raise ValueError('must be a set')

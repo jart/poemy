@@ -14,7 +14,7 @@ if __name__ == '__main__':
     db['rhyme'] = {}          # IH D -> wretched, winded, wielded, ...
     db['brhyme'] = {}         # IY -> regal, eagle, ...
     db['frhyme'] = {}         # EY N T AH D -> painted, acquainted, ...
-    db['mets'] = {}           # 110 -> delisted, digested, discounted, ...
+    db['meterwords'] = {}     # 110 -> delisted, digested, discounted, ...
     db['syl2words'] = {}      # 1 -> cat, hat, log, dog, bam, doh, ...
     db['front'] = {}          # T -> typo, tycoon, tye, ...
     db['back'] = {}           # T -> zealot, what, hat, zapped, ...
@@ -50,7 +50,7 @@ if __name__ == '__main__':
         db['meters'].setdefault(word, [])
         if meter not in db['meters'][word]:
             db['meters'][word].append(meter)
-        db['mets'].setdefault(meter, set()).add(word)
+        db['meterwords'].setdefault(meter, set()).add(word)
         db['syl2words'].setdefault(len(meter), set()).add(word)
         snds = sound.split()
         db['front'].setdefault(snds[0], set()).add(word)
@@ -89,7 +89,8 @@ if __name__ == '__main__':
         for path in glob.glob('corpora/%s/*.txt' % (corpus)):
             data = open(path).read()
             data = data.lower()
-            data = re.sub(r"[^-'\n a-z]", r'', data)
+            data = re.sub(r'\.', '\n', data)
+            data = re.sub(r"[^-'\n a-z]", r' ', data)
             data = re.sub(r"([a-z])-+(\s)", r'\1\2', data)
             data = re.sub(r"(\s)-+([a-z])", r'\1\2', data)
             db['words'] |= set(data.split())
