@@ -18,7 +18,7 @@ def get_firstwords():
 
 def mkword(w1, w2, meter, rhyme):
     if not meter:
-        if w2 in poemy.stopwords:
+        if w2 in poemy.badendwords:
             raise Exhausted()
         if rhyme:
             if w2 == rhyme:
@@ -28,7 +28,7 @@ def mkword(w1, w2, meter, rhyme):
         return []
     nextwords = poemy.db.chain.get((w1, w2), [])[:]
     while nextwords:
-        w3 = nextwords.pop(random.randrange(max(len(nextwords) / 4, 1)))
+        w3 = nextwords.pop(random.randrange(max(len(nextwords) / 8, 1)))
         if w3 not in poemy.db.sounds:
             continue
         wcm = poemy.wordcompatmeter(meter, w3)
@@ -43,9 +43,13 @@ def mkword(w1, w2, meter, rhyme):
 
 def mkline(meter, rhyme):
     firstwords = get_firstwords()[:]
-    while firstwords:
-        w1, w2 = firstwords.pop(random.randrange(max(len(firstwords) / 1, 1)))
+    n = 0
+    while firstwords and n < 10:
+        n += 1
+        w1, w2 = firstwords.pop(random.randrange(max(len(firstwords) / 4, 1)))
         if w1 not in poemy.db.sounds or w2 not in poemy.db.sounds:
+            continue
+        if w1 in poemy.badstartwords:
             continue
         wcm = poemy.wordcompatmeter(meter, w1, w2)
         if wcm is None:
@@ -88,13 +92,15 @@ if __name__ == '__main__':
         n = 0
         while True:
             try:
-                l1 = mkline('01010101', None)
-                l2 = mkline('01010101', l1[-1])
+                l1 = mkline('0101010101', None)
+                l2 = mkline('0101010101', l1[-1])
             except Exhausted:
                 continue
-            print ' '.join(l1) + ', ' + ' '.join(l2)
+            # print ' '.join(l1) + ', ' + ' '.join(l2)
+            print ' '.join(l1)
+            print ' '.join(l2)
             n += 1
-            if n == 10:
+            if n == 20:
                 break
 
     # analyze the meter of a poem from stdin

@@ -109,7 +109,28 @@ wherein whereupon wherever whether which while whither who whoever whole whom
 whose why will with within without would yet you your yours yourself
 yourselves the thee thy thyself thine hast dost thou art shalt shall wilst
 didst hath wert doth wouldst hitherto ought nought i o i'm we're you're
-she's he's
+she's he's don't
+'''.split())
+
+badstartwords = set('''
+me alive
+'''.split())
+
+badendwords = set('''
+a i o i'm we're you're she he she's he's his her don't the they they're their
+an and as at by but do been can can't cannot not could couldn't else both
+except even ever every except fill find for former formerly forty found from
+get give go had has hasnt have hence here hereby herein hereupon how however
+ie if in into is it its it's keep last less made many may me meanwhile might
+most mostly much must my namely neither next nobody now of off on once only
+onto or otherwise our ours out over perhaps put rather see seem seemed seems
+should since so some such than that them then thence there thereby therefore
+therein thereupon these they this those through throughout thru thus to too
+toward towards under until up upon very via was we wherein whereupon wherever
+whether which while who whole whom whose will with within without would yet
+you your thy thine hast dost thou art shalt shall wilst didst hath wert doth
+would'st ought nought are be all no one's i've were where take along what came
+when did says nor
 '''.split())
 
 
@@ -163,6 +184,7 @@ def wordsounds(word):
     return db.sounds[word]
 
 
+@memoize
 def wordmeters(*words):
     r"""Returns how each syllable is emphasized
 
@@ -186,9 +208,13 @@ def wordmeters(*words):
     :param word: Word to look up
     :return:     List of strings of 1/0's to denote emphasis of syllables
     """
-    return (''.join(a) for a in product(*[db.meters[w] for w in words]))
+    if len(words) == 1:
+        return db.meters[words[0]]
+    else:
+        return [''.join(a) for a in product(*[db.meters[w] for w in words])]
 
 
+@memoize
 def wordcompatmeter(meter, *words):
     r"""Determine if words are compatible with meter
 
@@ -262,6 +288,7 @@ def meterwords(meter):
     return res
 
 
+@memoize
 @contract
 def soundparts(sound):
     r"""Break sound down into syllables
@@ -296,6 +323,7 @@ def soundparts(sound):
     return res[0], res[1:]
 
 
+@memoize
 @contract
 def is_rhyme(word1, word2):
     r"""Test if last syllable of each word is pronounced the same
@@ -329,6 +357,7 @@ def is_rhyme(word1, word2):
     return False
 
 
+@memoize
 @contract
 def is_frhyme(word1, word2):
     r"""Test if feminine rhyme (last two syllables pronounced the same)
