@@ -68,3 +68,8 @@ cmudict that look like this: `TWISTED  T W IH1 S T AH0 D`.
 
 If you're interested, send me a message on Github or email
 <jtunney@lobstertech.com>.
+
+## Copyright
+
+Copright (c) 2012 Justine Tunney  
+Licensed under the AGPL v3 or later
