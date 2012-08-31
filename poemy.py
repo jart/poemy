@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 r"""
 
     poemy
@@ -7,6 +8,8 @@ r"""
 
 """
 
+import re
+import glob
 import marshal
 from itertools import product
 
@@ -114,15 +117,15 @@ class DB(object):
     def __init__(self):
         self.db = None
 
-    def load(self):
-        if not self.db:
-            self.db = marshal.load(open('db.marshal'))
+    def reload(self):
+        self.db = marshal.load(open('db.marshal'))
 
     def __getattribute__(self, key):
         try:
             return object.__getattribute__(self, key)
         except AttributeError:
-            self.load()
+            if not self.db:
+                self.reload()
             return self.db[key]
 
 
@@ -297,6 +300,25 @@ def is_frhyme(word1, word2):
             p1[1][-1] == p2[1][-1]):
             return True
     return False
+
+
+def corpuswords(corpus):
+    r"""Return set of words found in corpus"""
+    text = []
+    for path in glob.glob('corpora/%s/*.txt' % (corpus)):
+        text.append(open(path).read())
+    text = '\n'.join(text)
+    return textwords(text)
+
+
+def textwords(text):
+    r"""Return set of words from blob of text"""
+    text = text.lower()
+    text = re.sub(r"''|``", '"', text)      # latex style quotes
+    text = re.sub(r"[’`]", "'", text)       # wacky apostrophes
+    text = re.sub(r"[^-'a-z]", r' ', text)  # remove non-word chars
+    text = re.sub(r"--+", r' ', text)       # break apart dashes
+    return set(text.split())
 
 
 db = DB()

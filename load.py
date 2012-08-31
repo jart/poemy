@@ -9,6 +9,7 @@ from poemy import soundparts
 
 if __name__ == '__main__':
     db = {}
+    db['cmudict'] = {}        # delisted -> ['D IY1 L IH1 S T IH0 D', ...]
     db['sounds'] = {}         # delisted -> ['D IY L IH S T IH D', ...]
     db['meters'] = {}         # delisted -> ['110', ...]
     db['rhyme'] = {}          # IH D -> wretched, winded, wielded, ...
@@ -37,7 +38,7 @@ if __name__ == '__main__':
 
     print 'loading cmudict.txt...'
     for line in open('cmudict.txt').readlines():
-        if not line or line.startswith(';;;'):
+        if not line.strip() or line.startswith(';;;'):
             continue
         word, pron = line.split('  ')
         if word.endswith(')'):
@@ -46,6 +47,7 @@ if __name__ == '__main__':
         pron = pron.strip()
         sound = re.sub(r'\d', '', pron)
         meter = re.sub(r'\D', '', pron).replace('2', '1')
+        db['cmudict'].setdefault(word, []).append(pron)
         db['sounds'].setdefault(word, []).append(sound)
         db['meters'].setdefault(word, [])
         if meter not in db['meters'][word]:

@@ -1,3 +1,4 @@
+import re
 import sys
 import random
 
@@ -53,14 +54,7 @@ if __name__ == '__main__':
                 print line.rstrip()
                 word = ''
 
-    if sys.argv[1] == 'meter':
-        for word in sys.argv[2:]:
-            for meter in poemy.wordmeter(word, full=True):
-                line = "%15s" % (word)
-                line += "%10s" % (meter)
-                print line
-                word = ''
-
+    # generate some poetry using markov chains
     if sys.argv[1] == 'markov':
         out = 0
         while True:
@@ -74,3 +68,31 @@ if __name__ == '__main__':
                 out += 2
                 if out == 10:
                     break
+
+    # analyze the meter of a poem from stdin
+    if sys.argv[1] == 'analyze':
+        for line in sys.stdin.readlines():
+            line = line.lower()
+            line = re.sub(r"[^-'a-z]", r' ', line)
+            line = line.split()
+            print ' '.join(line)
+            out = [[], []]
+            syls = 0
+            for word in line:
+                for j in range(len(out)):
+                    try:
+                        meter = poemy.wordmeters(word)[j]
+                    except KeyError:
+                        word2 = ['!' for n in range(len(word))]
+                    except IndexError:
+                        word2 = [' ' for n in range(len(word))]
+                    else:
+                        if j == 0:
+                            syls += len(meter)
+                        word2 = [' ' for n in range(len(word))]
+                        for n in range(len(meter)):
+                            word2[len(word) / len(meter) * n] = meter[n]
+                    out[j].append(''.join(word2))
+            out[0] += ["(%d syllables)" % (syls)]
+            for l in out:
+                print ' '.join(l)
