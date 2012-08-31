@@ -50,3 +50,21 @@ masculine couplet rhyming scheme:
 > your mouth by your voice in my world of hate  
 > from those brown hills have melted into spring  
 > and dancing in the power of the thing
+
+## Volunteers
+
+I need your help to make poemy awesome!
+
+1. Programming. If you know how to code, feel free to start hacking and send
+me pull requests.
+
+2. Corpus assembly. I need people who can help me collect poems in text file
+format and categorize them by style.
+
+3. Word pronunciation. Poemy has to know how every word is pronounced and
+which syllables are emphasized, but many of the words in the corpora aren't
+defined in `data/cmudict.txt` :( I need people to help me add entries to
+cmudict that look like this: `TWISTED  T W IH1 S T AH0 D`.
+
+If you're interested, send me a message on Github or email
+<jtunney@lobstertech.com>.
