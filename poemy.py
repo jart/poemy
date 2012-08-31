@@ -113,7 +113,7 @@ she's he's don't
 '''.split())
 
 badstartwords = set('''
-me alive
+me alive of
 '''.split())
 
 badendwords = set('''

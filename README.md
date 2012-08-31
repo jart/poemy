@@ -27,3 +27,26 @@ beauty of the words it writes.
 
 poemy will only be able to write poetry in English. There are absolutely no
 plans or preparations to support other languages.
+
+## Running
+
+    python load.py goth
+    python info.py markov
+
+## Example Poem
+
+This poem was generated from the goth corpus in iambic pentameter using a
+masculine couplet rhyming scheme:
+
+> we really have to plug my eyes before  
+> black angel i feel hunger for the shore  
+> which answered not with a caress he died  
+> shone for me to the lake of the night tide  
+> with sadness here i opened wide the door  
+> that scream i hear the angels name lenore  
+> i'll show you all the seeming of a trend  
+> no reason for you and i don't pretend  
+> young soul from the laugh of the desolate  
+> your mouth by your voice in my world of hate  
+> from those brown hills have melted into spring  
+> and dancing in the power of the thing

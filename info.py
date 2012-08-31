@@ -28,7 +28,7 @@ def mkword(w1, w2, meter, rhyme):
         return []
     nextwords = poemy.db.chain.get((w1, w2), [])[:]
     while nextwords:
-        w3 = nextwords.pop(random.randrange(max(len(nextwords) / 8, 1)))
+        w3 = nextwords.pop(random.randrange(max(len(nextwords) / 4, 1)))
         if w3 not in poemy.db.sounds:
             continue
         wcm = poemy.wordcompatmeter(meter, w3)
@@ -46,7 +46,7 @@ def mkline(meter, rhyme):
     n = 0
     while firstwords and n < 10:
         n += 1
-        w1, w2 = firstwords.pop(random.randrange(max(len(firstwords) / 4, 1)))
+        w1, w2 = firstwords.pop(random.randrange(max(len(firstwords) / 2, 1)))
         if w1 not in poemy.db.sounds or w2 not in poemy.db.sounds:
             continue
         if w1 in poemy.badstartwords:
