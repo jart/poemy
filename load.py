@@ -37,7 +37,7 @@ if __name__ == '__main__':
             sys.exit(1)
 
     print 'loading cmudict.txt...'
-    for line in open('cmudict.txt').readlines():
+    for line in open('data/cmudict.txt').readlines():
         if not line.strip() or line.startswith(';;;'):
             continue
         word, pron = line.split('  ')
@@ -65,7 +65,7 @@ if __name__ == '__main__':
             syls = syls[1:]
 
     print 'loading wordnet...'
-    for path in glob.glob('wordnet/data.*'):
+    for path in glob.glob('data/wordnet/data.*'):
         for line in open(path).readlines():
             if not line or line.startswith('  '):
                 continue

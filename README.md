@@ -17,8 +17,8 @@ Why will poemy be so awesome? Because it'll be able to generate poetry from a
   anapestic trimeter, etc.
 - **Any style**. Poemy will be trained to be capable of picking words and
   sentence structures from various historical and contemporary styles. You
-  want a Shakespearean sonnet? No problem. Some dark melancholic goth music
-  lyrics? You got it.
+  want a Shakespearean sonnet? You got it. Some dark melancholic goth music
+  lyrics? No problem.
 
 What's the catch? The poems won't make any sense. But that doesn't matter
 because poetry doesn't have to make sense! But even if you impute poor poemy

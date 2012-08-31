@@ -72,7 +72,9 @@ if __name__ == '__main__':
     # analyze the meter of a poem from stdin
     if sys.argv[1] == 'analyze':
         for line in sys.stdin.readlines():
-            line = line.lower()
+            line = line.strip().lower()
+            if not line:
+                continue
             line = re.sub(r"[^-'a-z]", r' ', line)
             line = line.split()
             print ' '.join(line)
