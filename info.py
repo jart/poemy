@@ -5,29 +5,56 @@ import random
 import poemy
 
 
-def mkline(originality=7, nonrepetitiveness=2, syllables=10, rhythm='01' * 5):
-    while True:
+class Exhausted(Exception):
+    pass
+
+
+@poemy.memoize
+def get_firstwords():
+    firstwords = poemy.db.chain.keys()
+    firstwords.sort(key=lambda w: len(w[0] + w[1]), reverse=True)
+    return firstwords
+
+
+def mkword(w1, w2, meter, rhyme):
+    if not meter:
+        if w2 in poemy.stopwords:
+            raise Exhausted()
+        if rhyme:
+            if w2 == rhyme:
+                raise Exhausted()
+            if not poemy.is_rhyme(w2, rhyme):
+                raise Exhausted()
+        return []
+    nextwords = poemy.db.chain.get((w1, w2), [])[:]
+    while nextwords:
+        w3 = nextwords.pop(random.randrange(max(len(nextwords) / 4, 1)))
+        if w3 not in poemy.db.sounds:
+            continue
+        wcm = poemy.wordcompatmeter(meter, w3)
+        if wcm is None:
+            continue
         try:
-            rim = rhythm
-            vary = 0
-            w1, w2 = random.choice(poemy.db.chain.keys())
-            line = [w1, w2]
-            while len(line) < 10:
-                words = poemy.db.chain[(w1, w2)]
-                # ones = set(w for w in words if w in poemy.db.mets['1'])
-                # words = set(w for w in words if w in happy and not in ones)
-                vary += len(words)
-                w1, w2 = w2, random.choice(words)
-                line.append(w2)
-        except KeyError:
+            return [w3] + mkword(w2, w3, meter[len(wcm):], rhyme)
+        except Exhausted:
             pass
-        if len(line) < 8:
+    raise Exhausted()
+
+
+def mkline(meter, rhyme):
+    firstwords = get_firstwords()[:]
+    while firstwords:
+        w1, w2 = firstwords.pop(random.randrange(max(len(firstwords) / 1, 1)))
+        if w1 not in poemy.db.sounds or w2 not in poemy.db.sounds:
             continue
-        if vary < len(line) * originality:
+        wcm = poemy.wordcompatmeter(meter, w1, w2)
+        if wcm is None:
             continue
-        if len(set(line)) <= len(line) / nonrepetitiveness:
-            continue
-        return line
+        try:
+            return [w1, w2] + mkword(w1, w2, meter[len(wcm):], rhyme)
+        except Exhausted:
+            pass
+    raise Exhausted()
 
 
 if __name__ == '__main__':
@@ -56,18 +83,19 @@ if __name__ == '__main__':
 
     # generate some poetry using markov chains
     if sys.argv[1] == 'markov':
-        out = 0
+        # for n in range(14):
+        #     print ' '.join(mkline('001' * 3))
+        n = 0
         while True:
-            l1, l2 = mkline(), mkline()
-            if (l1[-1] != l2[-1] and
-                l1[-1] not in poemy.stopwords and
-                l2[-1] not in poemy.stopwords and
-                poemy.is_rhyme(l1[-1], l2[-1])):
-                print ' '.join(l1)
-                print ' '.join(l2)
-                out += 2
-                if out == 10:
-                    break
+            try:
+                l1 = mkline('01010101', None)
+                l2 = mkline('01010101', l1[-1])
+            except Exhausted:
+                continue
+            print ' '.join(l1) + ', ' + ' '.join(l2)
+            n += 1
+            if n == 10:
+                break
 
     # analyze the meter of a poem from stdin
     if sys.argv[1] == 'analyze':
@@ -83,7 +111,7 @@ if __name__ == '__main__':
             for word in line:
                 for j in range(len(out)):
                     try:
-                        meter = poemy.wordmeters(word)[j]
+                        meter = list(poemy.wordmeters(word))[j]
                     except KeyError:
                         word2 = ['!' for n in range(len(word))]
                     except IndexError:

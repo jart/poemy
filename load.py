@@ -53,6 +53,16 @@ if __name__ == '__main__':
         if meter not in db['meters'][word]:
             db['meters'][word].append(meter)
         db['meterwords'].setdefault(meter, set()).add(word)
+
+        # single syllable words are wildcards for now
+        if len(meter) == 1:
+            db['meterwords'].setdefault('0', set()).add(word)
+            db['meterwords'].setdefault('1', set()).add(word)
+            if '0' not in db['meters'][word]:
+                db['meters'][word].append('0')
+            if '1' not in db['meters'][word]:
+                db['meters'][word].append('1')
+
         db['syl2words'].setdefault(len(meter), set()).add(word)
         snds = sound.split()
         db['front'].setdefault(snds[0], set()).add(word)
@@ -109,6 +119,9 @@ if __name__ == '__main__':
                         w1, w2 = w2, w3
                 except StopIteration:
                     pass
+        for key in db['chain'].keys():
+            db['chain'][key] = list(set(db['chain'][key]))
+            db['chain'][key].sort(key=lambda w: len(w), reverse=True)
 
     print 'marshaling...'
     marshal.dump(db, open('db.marshal', 'w'))

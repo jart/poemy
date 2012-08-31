@@ -11,6 +11,7 @@ r"""
 import re
 import glob
 import marshal
+import functools
 from itertools import product
 
 from contracts import contract
@@ -107,7 +108,8 @@ well were what whatever when whence whenever where whereafter whereas whereby
 wherein whereupon wherever whether which while whither who whoever whole whom
 whose why will with within without would yet you your yours yourself
 yourselves the thee thy thyself thine hast dost thou art shalt shall wilst
-didst hath wert doth wouldst hitherto ought nought i o
+didst hath wert doth wouldst hitherto ought nought i o i'm we're you're
+she's he's
 '''.split())
 
 
@@ -129,6 +131,19 @@ class DB(object):
             return self.db[key]
 
 
+def memoize(funk):
+    r"""Memoize decorator for simple pure functions"""
+    funk.memoize = {}
+    @functools.wraps(funk)
+    def _memoize(*args):
+        if args in funk.memoize:
+            return funk.memoize[args]
+        res = funk(*args)
+        funk.memoize[args] = res
+        return res
+    return _memoize
+
+
 @contract
 def wordsounds(word):
     r"""Returns how a word is pronounced
@@ -148,32 +163,64 @@ def wordsounds(word):
     return db.sounds[word]
 
 
-@contract
-def wordmeters(word):
+def wordmeters(*words):
     r"""Returns how each syllable is emphasized
 
     For example::
 
-        >>> wordmeters('adulterate')
+        >>> list(wordmeters('adulterate'))
         ['0101']
-        >>> wordmeters('adult')
+        >>> list(wordmeters('adult'))
         ['01', '10']
-        >>> wordmeters('created')
+        >>> list(wordmeters('created'))
         ['010']
 
+    You can also specify multiple words to return the cartesian product of the
+    meters for all words::
+
+        >>> list(wordmeters('adult', 'created'))
+        ['01010', '10010']
+        >>> list(wordmeters('adult', 'adult'))
+        ['0101', '0110', '1001', '1010']
+
     :param word: Word to look up
-    :type word:  word
     :return:     List of strings of 1/0's to denote emphasis of syllables
-    :rtype:      list[>=1](meter)
     """
-    return db.meters[word]
+    return (''.join(a) for a in product(*[db.meters[w] for w in words]))
 
 
+def wordcompatmeter(meter, *words):
+    r"""Determine if words are compatible with meter
+
+    For exmaple::
+
+        >>> wordcompatmeter('0101', 'shall', 'i', 'compare')
+        '0101'
+        >>> wordcompatmeter('010101', 'shall', 'i', 'compare')
+        '0101'
+        >>> wordcompatmeter('0110', 'shall', 'i', 'compare')
+        None
+
+    """
+    for wm in wordmeters(*words):
+        if meter.startswith(wm):
+            return wm
+    return None
+
+
+@memoize
 @contract
 def meterwords(meter):
-    r"""Return all words greater than one syllable compatible with meter
+    r"""Return all words compatible with meter specification
 
-    This function is memoized.
+    Let's say you need to pick the first word for a line in iambic pentameter.
+    That means the remaining part of your meter specification is `'010101...'
+    so you need a set of all two syllable words with the meter '01', all three
+    syllable words with meter '010', and so forth.
+
+    Now let's say you get a three syllable word from this function and you're
+    happy. You then trim three characters off the beginning of your meter
+    specification and call this function again.
 
     For example::
 
@@ -183,18 +230,36 @@ def meterwords(meter):
         True
         >>> 'biggie' in meterwords('01' * 5)
         False
+        >>> 'antidisestablishmentarianism' in meterwords('100010010000')
+        True
 
-    :param meter: Meter to be consumed
+    The resulting set will also include ALL one syllable words because I
+    haven't figured out how to determine emphasis for such words yet. They're
+    considered wildcards::
+
+        >>> 'ought' in meterwords('1')
+        True
+        >>> 'ought' in meterwords('0')
+        True
+
+    Some words have multiple pronunciations::
+
+        >>> 'content' in meterwords('01')
+        True
+        >>> 'content' in meterwords('10')
+        True
+
+    The result of this function is memoized.
+
+    :param meter: Meter specification to be consumed
     :type meter:  meter
-    :return:      List of strings of 1/0's to denote emphasis of syllables
+    :return:      Set of words compatible with meter specification
     :rtype:       myset
     """
-    if len(meter) <= 1:
-        return set()
-    happy = set()
-    for n in range(1, 5):
-        if len(rim) >= n:
-            happy |= poemy.db.mets[rim[:n]]
+    res = set()
+    for n in range(len(meter) + 1):
+        res |= db.meterwords.get(meter[:n], set())
+    return res
 
 
 @contract
@@ -312,7 +377,7 @@ def corpuswords(corpus):
 
 
 def textwords(text):
-    r"""Return set of words from blob of text"""
+    r"""Return set of words from a blob of text"""
     text = text.lower()
     text = re.sub(r"''|``", '"', text)      # latex style quotes
     text = re.sub(r"[’`]", "'", text)       # wacky apostrophes
@@ -322,3 +387,8 @@ def textwords(text):
 
 
 db = DB()
+
+
+if __name__ == "__main__":
+    import doctest
+    doctest.testmod()
