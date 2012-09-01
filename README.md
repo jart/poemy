@@ -33,9 +33,9 @@ plans or preparations to support other languages.
     python load.py goth
     python info.py markov
 
-## Example Poem
+## Example Poems
 
-This poem was generated from the goth corpus in iambic pentameter using a
+This poem was generated from the gothic corpus in iambic pentameter using a
 masculine couplet rhyming scheme:
 
 > we really have to plug my eyes before  
@@ -50,6 +50,33 @@ masculine couplet rhyming scheme:
 > your mouth by your voice in my world of hate  
 > from those brown hills have melted into spring  
 > and dancing in the power of the thing
+
+Here's an iambic pentameter couplet poem trained by Shakespeare's sonnets:
+
+> than public means which public manners breeds  
+> the judgment of my love that in thy deeds  
+> be nothing new but that which flies before  
+> stirr'd by a painted beauty to his store  
+> friend's heart let my heart think that we before  
+> remov'd that hidden in thee is of more  
+> as objects to his palate doth prepare  
+> clouds o'ertake me in my love as rare  
+> pursuit of the world that i cannot blame  
+> thus vainly thinking that she hath no name
+
+Here's another iambic pentameter couplet poem trained by the book War and
+Peace with a preference towards big words:
+
+> natasha brightened up and disappeared  
+> expressed approval and not once appeared  
+> without restraining her sobs that were brought  
+> concealed depression on the russians thought  
+> more extraordinary in that plight  
+> convince themselves by the thought could not quite  
+> restrain themselves and mounted on black roan  
+> direct participation of the cone  
+> great disappointment like a suffering child  
+> prepared provisions for the princess smiled
 
 ## Volunteers
 
