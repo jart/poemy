@@ -20,14 +20,15 @@ def pick(words, opts):
     return random.randrange(int(round(len(words) * opts['bigwords'])))
 
 
-def mkword(w1, w2, meter, rhyme, opts):
+def mkword(w1, w2, meter, rhythm, rhyme, opts):
     if not meter:
         if w2 in poemy.badendwords:
             raise Exhausted()
         if rhyme:
             if w2 == rhyme:
                 raise Exhausted()
-            if not poemy.is_rhyme(w2, rhyme):
+            rf = poemy.is_frhyme if opts['feminine'] else poemy.is_rhyme
+            if not rf(w2, rhyme):
                 raise Exhausted()
         return []
     words = poemy.db.chain.get((w1, w2), [])[:]
@@ -42,17 +43,22 @@ def mkword(w1, w2, meter, rhyme, opts):
         wcm = poemy.wordcompatmeter(meter, w3)
         if wcm is None:
             continue
+        wcr = poemy.wordcompatrhythm(rhythm, w3)
+        if wcr is None:
+            continue
         try:
-            return [w3] + mkword(w2, w3, meter[len(wcm):], rhyme, opts)
+            return [w3] + mkword(
+                w2, w3, meter[len(wcm):], rhythm[len(wcr):], rhyme, opts)
         except Exhausted:
             pass
     raise Exhausted()
 
 
-def mkline(meter, rhyme, **opts):
+def mkline(meter, rhythm, rhyme, **opts):
     opts.setdefault('tries', 20)
     opts.setdefault('originality', 1)
     opts.setdefault('bigwords', 0.7)
+    opts.setdefault('feminine', False)
     words = firstwords()
     for n in xrange(opts['tries']):
         w1, w2 = words[pick(words, opts)]
@@ -63,8 +69,12 @@ def mkline(meter, rhyme, **opts):
         wcm = poemy.wordcompatmeter(meter, w1, w2)
         if wcm is None:
             continue
+        wcr = poemy.wordcompatrhythm(rhythm, w1, w2)
+        if wcr is None:
+            continue
         try:
-            return [w1, w2] + mkword(w1, w2, meter[len(wcm):], rhyme, opts)
+            return [w1, w2] + mkword(
+                w1, w2, meter[len(wcm):], rhythm[len(wcr):], rhyme, opts)
         except Exhausted:
             pass
     raise Exhausted()
@@ -115,9 +125,10 @@ if __name__ == '__main__':
             # 6 feet - hexameter
             # 7 feet - heptameter
             try:
-                m = '10' * 5
-                l1 = mkline(m, None)
-                l2 = mkline(m, l1[-1])
+                m = '0101010101'
+                r = 'ssssslllll'
+                l1 = mkline(m, r, None)
+                l2 = mkline(m, r, l1[-1])
             except Exhausted:
                 continue
             # print ' '.join(l1) + ', ' + ' '.join(l2)

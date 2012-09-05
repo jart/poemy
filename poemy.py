@@ -22,6 +22,8 @@ import mycontracts
 # EY / IY <-- very similar
 
 vowels = set('AA AE AH AO AW AY EH ER EY IH IY OW OY UH UW'.split())
+long_vowels = set('AW AY AO EY UW IY OY OW'.split())
+short_vowels = vowels - long_vowels
 consonants = set('B CH D DH F G HH JH K L M N NG P R S SH T TH V W '
                  'Y Z ZH'.split())
 phonemes = vowels | consonants
@@ -130,7 +132,7 @@ toward towards under until up upon very via was we wherein whereupon wherever
 whether which while who whole whom whose will with within without would yet
 you your thy thine hast dost thou art shalt shall wilst didst hath wert doth
 would'st ought nought are be all no one's i've were where take along what came
-when did says nor
+when did says nor i'll
 '''.split())
 
 
@@ -232,6 +234,43 @@ def wordcompatmeter(meter, *words):
         if meter.startswith(wm):
             return wm
     return None
+
+
+@memoize
+def wordcompatrhythm(rhythm, *words):
+    r"""Determine if words are compatible with rhythm
+
+    For exmaple::
+
+        >>> wordcompatrhythm('---', 'created')
+        '---'
+        >>> wordcompatrhythm('llslls', 'created')
+        'lls'
+        >>> wordcompatrhythm('llslls', 'created', 'created')
+        'llslls'
+        >>> wordcompatrhythm('ssl', 'created') is None
+        True
+        >>> wordcompatrhythm('ssssslllll', 'toward', 'nicholas', 'came', 'the', 'sounds', 'which', 'anyone') is None
+        True
+
+    """
+    ri = iter(rhythm)
+    res = ''
+    try:
+        for w in words:
+            for ws in wordsounds(w)[0].split():
+                if ws in vowels:
+                    r = ri.next()
+                    res += r
+                    if r == 'l':
+                        if ws not in long_vowels:
+                            return None
+                    elif r == 's':
+                        if ws not in short_vowels:
+                            return None
+        return res
+    except StopIteration:
+        return None
 
 
 @memoize
