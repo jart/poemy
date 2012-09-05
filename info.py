@@ -17,7 +17,7 @@ def firstwords():
 
 
 def pick(words, opts):
-    return random.randrange(int(round(len(words) * opts['bigwords'])))
+    return random.randrange(max(int(round(len(words) * opts['bigwords'])), 1))
 
 
 def mkword(w1, w2, meter, rhythm, rhyme, opts):
@@ -57,7 +57,7 @@ def mkword(w1, w2, meter, rhythm, rhyme, opts):
 def mkline(meter, rhythm, rhyme, **opts):
     opts.setdefault('tries', 20)
     opts.setdefault('originality', 1)
-    opts.setdefault('bigwords', 0.7)
+    opts.setdefault('bigwords', 0.9)
     opts.setdefault('feminine', False)
     words = firstwords()
     for n in xrange(opts['tries']):
@@ -125,17 +125,17 @@ if __name__ == '__main__':
             # 6 feet - hexameter
             # 7 feet - heptameter
             try:
-                m = '0101010101'
-                r = 'ssssslllll'
+                m = '0101011'
+                r = '-------'
                 l1 = mkline(m, r, None)
                 l2 = mkline(m, r, l1[-1])
             except Exhausted:
                 continue
-            # print ' '.join(l1) + ', ' + ' '.join(l2)
-            print ' '.join(l1)
-            print ' '.join(l2)
+            print ' '.join(l1) + ', ' + ' '.join(l2)
+            # print ' '.join(l1)
+            # print ' '.join(l2)
             n += 1
-            if n == 10:
+            if n == 20:
                 break
 
     # analyze the meter of a poem from stdin

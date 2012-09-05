@@ -22,7 +22,7 @@ import mycontracts
 # EY / IY <-- very similar
 
 vowels = set('AA AE AH AO AW AY EH ER EY IH IY OW OY UH UW'.split())
-long_vowels = set('AW AY AO EY UW IY OY OW'.split())
+long_vowels = set('AW AO EY UW IY OY OW'.split())
 short_vowels = vowels - long_vowels
 consonants = set('B CH D DH F G HH JH K L M N NG P R S SH T TH V W '
                  'Y Z ZH'.split())
@@ -132,7 +132,7 @@ toward towards under until up upon very via was we wherein whereupon wherever
 whether which while who whole whom whose will with within without would yet
 you your thy thine hast dost thou art shalt shall wilst didst hath wert doth
 would'st ought nought are be all no one's i've were where take along what came
-when did says nor i'll
+when did says nor i'll i'd
 '''.split())
 
 
