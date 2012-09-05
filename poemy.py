@@ -220,12 +220,12 @@ def wordcompatmeter(meter, *words):
 
     For exmaple::
 
-        >>> wordcompatmeter('0101', 'shall', 'i', 'compare')
-        '0101'
-        >>> wordcompatmeter('010101', 'shall', 'i', 'compare')
-        '0101'
-        >>> wordcompatmeter('0110', 'shall', 'i', 'compare')
-        None
+        >>> wordcompatmeter('010010', 'created')
+        '010'
+        >>> wordcompatmeter('010010', 'created', 'created')
+        '010010'
+        >>> wordcompatmeter('111111', 'created') is None
+        True
 
     """
     for wm in wordmeters(*words):
@@ -257,15 +257,6 @@ def meterwords(meter):
         >>> 'biggie' in meterwords('01' * 5)
         False
         >>> 'antidisestablishmentarianism' in meterwords('100010010000')
-        True
-
-    The resulting set will also include ALL one syllable words because I
-    haven't figured out how to determine emphasis for such words yet. They're
-    considered wildcards::
-
-        >>> 'ought' in meterwords('1')
-        True
-        >>> 'ought' in meterwords('0')
         True
 
     Some words have multiple pronunciations::
@@ -305,6 +296,8 @@ def soundparts(sound):
         ('DH', ['IY'])
         >>> soundparts('AE D AH P OW S')
         ('', ['AE D', 'AH P', 'OW S'])
+        >>> soundparts('AE')
+        ('', ['AE'])
 
     :param sound: Full sound phonemes for a word
     :type sound:  sound
@@ -321,6 +314,38 @@ def soundparts(sound):
     if part:
         res.append(' '.join(part))
     return res[0], res[1:]
+
+
+@memoize
+@contract
+def soundparts_left(sound):
+    r"""Break sound down into syllables (left version)
+
+    This is the same as soundparts() except it groups each vowel with its
+    preceding consonants (rather than following consonants).
+
+    For example:
+
+        >>> soundparts_left('P AE SH AH N')
+        (['P AE', 'SH AH'], 'N')
+        >>> soundparts_left('DH IY')
+        (['DH IY'], '')
+        >>> soundparts_left('AE D AH P OW S')
+        (['AE', 'D AH', 'P OW'], 'S')
+
+    :param sound: Full sound phonemes for a word
+    :type sound:  sound
+    :return:      List of phonemes for each syllable and trailing consonants
+    :rtype:       tuple(list[>=1](sound), str)
+    """
+    res = []
+    part = []
+    for snd in sound.split():
+        part.append(snd)
+        if snd in vowels:
+            res.append(' '.join(part))
+            part = []
+    return res, ' '.join(part)
 
 
 @memoize

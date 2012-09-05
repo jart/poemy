@@ -49,11 +49,10 @@ def mkword(w1, w2, meter, rhyme, opts):
     raise Exhausted()
 
 
-# http://en.wikipedia.org/wiki/Markov_chain_Monte_Carlo
 def mkline(meter, rhyme, **opts):
     opts.setdefault('tries', 20)
     opts.setdefault('originality', 1)
-    opts.setdefault('bigwords', 1.0)
+    opts.setdefault('bigwords', 0.7)
     words = firstwords()
     for n in xrange(opts['tries']):
         w1, w2 = words[pick(words, opts)]
@@ -116,8 +115,9 @@ if __name__ == '__main__':
             # 6 feet - hexameter
             # 7 feet - heptameter
             try:
-                l1 = mkline('01' * 5, None)
-                l2 = mkline('01' * 5, l1[-1])
+                m = '01' * 5
+                l1 = mkline(m, None)
+                l2 = mkline(m, l1[-1])
             except Exhausted:
                 continue
             # print ' '.join(l1) + ', ' + ' '.join(l2)

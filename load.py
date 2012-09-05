@@ -5,7 +5,7 @@ import sys
 import glob
 import marshal
 
-from poemy import soundparts
+from poemy import soundparts, soundparts_left
 
 
 if __name__ == '__main__':
@@ -53,11 +53,8 @@ if __name__ == '__main__':
         db['cmudict'].setdefault(word, []).append(pron)
         db['sounds'].setdefault(word, []).append(sound)
         db['syl2words'].setdefault(len(meter), set()).add(word)
-        # cmudict doesn't tell us about stress for single syllable words
         if len(meter) > 1:
-            db['meters'].setdefault(word, [])
-            if meter not in db['meters'][word]:
-                db['meters'][word].append(meter)
+            db['meters'].setdefault(word, []).append(meter)
             db['meterwords'].setdefault(meter, set()).add(word)
         snds = sound.split()
         db['front'].setdefault(snds[0], set()).add(word)
@@ -69,33 +66,39 @@ if __name__ == '__main__':
             db['frhyme'].setdefault(' '.join(syls), set()).add(word)
             syls = syls[1:]
 
+    # ok so here's the deal: cmudict does a great job telling us which
+    # syllables are stressed in words with more than one syllable, but when it
+    # comes to single syllable words, it always marks them as stressed. this
+    # is incorrect because some words are highly stressed (like: cat, dog,
+    # bog) and some words are almost never stressed (like: on, a, the). we
+    # need to be able to tell the difference in order to maintain a consistent
+    # meter.
+    #
+    # so what we do is we take all the multi-syllable words and build two
+    # tables that tell us the probability that a word starting or ending with
+    # a particular sound will be stressed. then we go through each single
+    # syllable word and compare its start/end sounds to the probability tables
+    # to determine the likelihood that the word is stressed
     print 'calculating probability of syllable stress...'
-    phonemes = {}
-    doodles = set()
-    for w in (db['syl2words'][2] |
-              db['syl2words'][3] |
-              db['syl2words'][4] |
-              db['syl2words'][5] |
-              db['syl2words'][6]):
-        ss = db['sounds'][w][0]
-        ms = db['meters'][w][0]
-        for s, m in zip(soundparts(ss)[1], ms):
-            phonemes.setdefault((s, int(m)), 0.0)
-            phonemes[s, int(m)] += 1.0
-            doodles.add(s)
-    sylstprob = {}
-    for s in doodles:
-        try:
-            sylstprob[s] = phonemes[s, 1] / (phonemes[s, 0] + phonemes[s, 1])
-        except KeyError:
-            pass
+    starters = {}
+    enders = {}
+    for w in (db['syl2words'][2] | db['syl2words'][3] | db['syl2words'][4] |
+              db['syl2words'][5] | db['syl2words'][6] | db['syl2words'][7]):
+        for ss, ms in zip(db['sounds'][w], db['meters'][w]):
+            s, m = soundparts_left(ss)[0][0], int(ms[0])
+            starters.setdefault(s, [0.0, 0.0])[m] += 1.0
+            s, m = soundparts(ss)[1][-1], int(ms[-1])
+            enders.setdefault(s, [0.0, 0.0])[m] += 1.0
+    starters = {s: v[1] / (v[0] + v[1]) for s, v in starters.iteritems()}
+    enders = {s: v[1] / (v[0] + v[1]) for s, v in enders.iteritems()}
 
     print 'guessing which single syllable words are stressed...'
     db['meterwords']['0'] = set()
     db['meterwords']['1'] = set()
     for w in db['syl2words'][1]:
-        s = soundparts(db['sounds'][w][0])[1][0]
-        p = sylstprob.get(s, 0.5)
+        start = soundparts_left(db['sounds'][w][0])[0][0]
+        end = soundparts(db['sounds'][w][0])[1][-1]
+        p = (starters.get(start, 0.5) + enders.get(end, 0.5)) / 2.0
         if p < 0.5:
             db['meters'][w] = ['0']
             db['meterwords']['0'].add(w)
