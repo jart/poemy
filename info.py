@@ -10,13 +10,17 @@ class Exhausted(Exception):
 
 
 @poemy.memoize
-def get_firstwords():
-    firstwords = poemy.db.chain.keys()
-    firstwords.sort(key=lambda w: len(w[0] + w[1]), reverse=True)
-    return firstwords
+def firstwords():
+    words = poemy.db.chain.keys()
+    words.sort(key=lambda w: len(w[0] + w[1]), reverse=True)
+    return words
 
 
-def mkword(w1, w2, meter, rhyme):
+def pick(words, opts):
+    return random.randrange(int(round(len(words) * opts['bigwords'])))
+
+
+def mkword(w1, w2, meter, rhyme, opts):
     if not meter:
         if w2 in poemy.badendwords:
             raise Exhausted()
@@ -26,27 +30,33 @@ def mkword(w1, w2, meter, rhyme):
             if not poemy.is_rhyme(w2, rhyme):
                 raise Exhausted()
         return []
-    nextwords = poemy.db.chain.get((w1, w2), [])[:]
-    while nextwords:
-        w3 = nextwords.pop(random.randrange(max(len(nextwords) / 4, 1)))
+    words = poemy.db.chain.get((w1, w2), [])[:]
+    if len(words) < opts['originality']:
+        raise Exhausted()
+    for n in range(opts['tries']):
+        if not words:
+            break
+        w3 = words.pop(pick(words, opts))
         if w3 not in poemy.db.sounds:
             continue
         wcm = poemy.wordcompatmeter(meter, w3)
         if wcm is None:
             continue
         try:
-            return [w3] + mkword(w2, w3, meter[len(wcm):], rhyme)
+            return [w3] + mkword(w2, w3, meter[len(wcm):], rhyme, opts)
         except Exhausted:
             pass
     raise Exhausted()
 
 
-def mkline(meter, rhyme):
-    firstwords = get_firstwords()[:]
-    n = 0
-    while firstwords and n < 10:
-        n += 1
-        w1, w2 = firstwords.pop(random.randrange(max(len(firstwords) / 2, 1)))
+# http://en.wikipedia.org/wiki/Markov_chain_Monte_Carlo
+def mkline(meter, rhyme, **opts):
+    opts.setdefault('tries', 20)
+    opts.setdefault('originality', 1)
+    opts.setdefault('bigwords', 1.0)
+    words = firstwords()
+    for n in xrange(opts['tries']):
+        w1, w2 = words[pick(words, opts)]
         if w1 not in poemy.db.sounds or w2 not in poemy.db.sounds:
             continue
         if w1 in poemy.badstartwords:
@@ -55,7 +65,7 @@ def mkline(meter, rhyme):
         if wcm is None:
             continue
         try:
-            return [w1, w2] + mkword(w1, w2, meter[len(wcm):], rhyme)
+            return [w1, w2] + mkword(w1, w2, meter[len(wcm):], rhyme, opts)
         except Exhausted:
             pass
     raise Exhausted()
@@ -91,16 +101,30 @@ if __name__ == '__main__':
         #     print ' '.join(mkline('001' * 3))
         n = 0
         while True:
+            # 01     - iambic
+            # 10     - trochaic
+            # 001    - anapestic
+            # 100    - dactylic
+            # 010    - amphibrachic
+            # 11     - a spondee foot
+            # 00     - a pyrrhic foot
+            # 1 foot - monometer
+            # 2 feet - dimeter
+            # 3 feet - trimeter
+            # 4 feet - tetrameter
+            # 5 feet - pentameter
+            # 6 feet - hexameter
+            # 7 feet - heptameter
             try:
-                l1 = mkline('0101010101', None)
-                l2 = mkline('0101010101', l1[-1])
+                l1 = mkline('01' * 5, None)
+                l2 = mkline('01' * 5, l1[-1])
             except Exhausted:
                 continue
             # print ' '.join(l1) + ', ' + ' '.join(l2)
             print ' '.join(l1)
             print ' '.join(l2)
             n += 1
-            if n == 20:
+            if n == 10:
                 break
 
     # analyze the meter of a poem from stdin
@@ -132,3 +156,53 @@ if __name__ == '__main__':
             out[0] += ["(%d syllables)" % (syls)]
             for l in out:
                 print ' '.join(l)
+
+    # what is the probability of each vowel being the stressed syllable?
+    if sys.argv[1] == 'vowel-stress-probability':
+        phonemes = {}
+        for w in (poemy.db.syl2words[2] |
+                  poemy.db.syl2words[3] |
+                  poemy.db.syl2words[4] |
+                  poemy.db.syl2words[5] |
+                  poemy.db.syl2words[6]):
+            for ps in poemy.db.cmudict.get(w, []):
+                for p in ps.split():
+                    if p.endswith(('0', '1')):
+                        phonemes.setdefault(p, 0.0)
+                        phonemes[p] += 1.0
+        res = []
+        for v in poemy.vowels:
+            p = phonemes[v + '1'] / (phonemes[v + '0'] + phonemes[v + '1'])
+            res.append((v, p))
+        res.sort(key=lambda v: v[1])
+        for v, p in res:
+            print "%s %.5f" % (v, p)
+
+    # same thing, but we include the following consonant
+    if sys.argv[1] == 'syllable-stress-probability':
+        phonemes = {}
+        doodles = set()
+        for w in (poemy.db.syl2words[2] |
+                  poemy.db.syl2words[3] |
+                  poemy.db.syl2words[4] |
+                  poemy.db.syl2words[5] |
+                  poemy.db.syl2words[6]):
+            if w not in poemy.db.sounds:
+                continue
+            ss = poemy.db.sounds[w][0]
+            ms = poemy.db.meters[w][0]
+            for s, m in zip(poemy.soundparts(ss)[1], ms):
+                phonemes.setdefault((s, int(m)), 0.0)
+                phonemes[s, int(m)] += 1.0
+                doodles.add(s)
+        res = []
+        for s in doodles:
+            try:
+                p = phonemes[s, 1] / (phonemes[s, 0] + phonemes[s, 1])
+                t = phonemes[s, 0] + phonemes[s, 1]
+                res.append((s, p, t))
+            except KeyError:
+                pass
+        res.sort(key=lambda v: v[0])
+        for s, p, t in res:
+            print "%-10s %.5f (%d)" % (s, p, t)

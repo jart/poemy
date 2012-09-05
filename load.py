@@ -1,5 +1,6 @@
 import os
 import re
+import gc
 import sys
 import glob
 import marshal
@@ -36,6 +37,8 @@ if __name__ == '__main__':
             print "'%s' corpus not found" % (corpus)
             sys.exit(1)
 
+    gc.disable()
+
     print 'loading cmudict.txt...'
     for line in open('data/cmudict.txt').readlines():
         if not line.strip() or line.startswith(';;;'):
@@ -49,21 +52,13 @@ if __name__ == '__main__':
         meter = re.sub(r'\D', '', pron).replace('2', '1')
         db['cmudict'].setdefault(word, []).append(pron)
         db['sounds'].setdefault(word, []).append(sound)
-        db['meters'].setdefault(word, [])
-        if meter not in db['meters'][word]:
-            db['meters'][word].append(meter)
-        db['meterwords'].setdefault(meter, set()).add(word)
-
-        # single syllable words are wildcards for now
-        if len(meter) == 1:
-            db['meterwords'].setdefault('0', set()).add(word)
-            db['meterwords'].setdefault('1', set()).add(word)
-            if '0' not in db['meters'][word]:
-                db['meters'][word].append('0')
-            if '1' not in db['meters'][word]:
-                db['meters'][word].append('1')
-
         db['syl2words'].setdefault(len(meter), set()).add(word)
+        # cmudict doesn't tell us about stress for single syllable words
+        if len(meter) > 1:
+            db['meters'].setdefault(word, [])
+            if meter not in db['meters'][word]:
+                db['meters'][word].append(meter)
+            db['meterwords'].setdefault(meter, set()).add(word)
         snds = sound.split()
         db['front'].setdefault(snds[0], set()).add(word)
         db['back'].setdefault(snds[-1], set()).add(word)
@@ -73,6 +68,44 @@ if __name__ == '__main__':
         while len(syls) >= 2:
             db['frhyme'].setdefault(' '.join(syls), set()).add(word)
             syls = syls[1:]
+
+    print 'calculating probability of syllable stress...'
+    phonemes = {}
+    doodles = set()
+    for w in (db['syl2words'][2] |
+              db['syl2words'][3] |
+              db['syl2words'][4] |
+              db['syl2words'][5] |
+              db['syl2words'][6]):
+        ss = db['sounds'][w][0]
+        ms = db['meters'][w][0]
+        for s, m in zip(soundparts(ss)[1], ms):
+            phonemes.setdefault((s, int(m)), 0.0)
+            phonemes[s, int(m)] += 1.0
+            doodles.add(s)
+    sylstprob = {}
+    for s in doodles:
+        try:
+            sylstprob[s] = phonemes[s, 1] / (phonemes[s, 0] + phonemes[s, 1])
+        except KeyError:
+            pass
+
+    print 'guessing which single syllable words are stressed...'
+    db['meterwords']['0'] = set()
+    db['meterwords']['1'] = set()
+    for w in db['syl2words'][1]:
+        s = soundparts(db['sounds'][w][0])[1][0]
+        p = sylstprob.get(s, 0.5)
+        if p < 0.5:
+            db['meters'][w] = ['0']
+            db['meterwords']['0'].add(w)
+        elif p < 0.7:
+            db['meters'][w] = ['0', '1']
+            db['meterwords']['0'].add(w)
+            db['meterwords']['1'].add(w)
+        else:
+            db['meters'][w] = ['1']
+            db['meterwords']['1'].add(w)
 
     print 'loading wordnet...'
     for path in glob.glob('data/wordnet/data.*'):
