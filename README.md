@@ -11,14 +11,31 @@ Why will poemy be so awesome? Because it'll be able to generate poetry from a
 100k+ word dictionary with:
 
 - **Any rhyming scheme**: like couplets, abab,
-  [acab](http://en.wikipedia.org/wiki/A.C.A.B.), etc. It'll also be able to do
-  feminine rhymes and repeat similar consonants for alliteration.
-- **Any meter or rhythm**: like iambic pentameter, trochaic tetrameter,
-  anapestic trimeter, etc.
-- **Any style**. Poemy will be trained to be capable of picking words and
-  sentence structures from various historical and contemporary styles. You
-  want a Shakespearean sonnet? You got it. Some dark melancholic goth music
-  lyrics? No problem.
+  [acab](http://en.wikipedia.org/wiki/A.C.A.B.), etc. Poemy knows how almost
+  every word in the english language is pronounced and is able to distinguish
+  between 15 vowel and 24 consonant phonemes. This means it knows "th**ee**"
+  and "atrocit**y**" rhyme but "**one**" and "b**one**" don't. Poemy also
+  takes into consideration how some words can be pronounced in different
+  ways. The rhyming algorithm considers two words as rhyming if the last vowel
+  and subsequent consonant phonemes match. Poemy can also do feminine rhymes!
+
+- **Any meter**: Poemy knows which syllables are stressed in each word. Poemy
+  can also predict with good accuracy whether or not a single syllable word
+  will be stressed in a sentence. This means it can write poetry in iambic
+  pentameter, trochaic tetrameter, anapestic trimeter, etc.
+
+- **Any rhythm**. Poemy is able to distinguish between long and short sounding
+  consonants. For example: "Cat attack galore" follows the rhyming scheme
+  "sssll" (s = short, l = long).
+
+- **Any style**. Poemy can be trained in various historical and contemporary
+  styles. You want a Shakespearean sonnet? You got it. Some dark melancholic
+  goth music lyrics? No problem.
+
+- **Alliteration**. Poemy will be able to ensure that particular or similar
+  consonants are repeated. It can also repeat vowels for assonance. It can
+  place these phonemes in a rigid syllable meter or use probabilistic
+  placement throughout a line.
 
 What's the catch? The poems won't make any sense. But that doesn't matter
 because poetry doesn't have to make sense! But even if you impute poor poemy
