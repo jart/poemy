@@ -250,8 +250,6 @@ def wordcompatrhythm(rhythm, *words):
         'llslls'
         >>> wordcompatrhythm('ssl', 'created') is None
         True
-        >>> wordcompatrhythm('ssssslllll', 'toward', 'nicholas', 'came', 'the', 'sounds', 'which', 'anyone') is None
-        True
 
     """
     ri = iter(rhythm)

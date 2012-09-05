@@ -125,17 +125,17 @@ if __name__ == '__main__':
             # 6 feet - hexameter
             # 7 feet - heptameter
             try:
-                m = '0101011'
-                r = '-------'
+                m = '0101010101'
+                r = '----------'
                 l1 = mkline(m, r, None)
                 l2 = mkline(m, r, l1[-1])
             except Exhausted:
                 continue
-            print ' '.join(l1) + ', ' + ' '.join(l2)
-            # print ' '.join(l1)
-            # print ' '.join(l2)
+            # print ' '.join(l1) + ', ' + ' '.join(l2)
+            print ' '.join(l1)
+            print ' '.join(l2)
             n += 1
-            if n == 20:
+            if n == 10:
                 break
 
     # analyze the meter of a poem from stdin
