@@ -98,7 +98,7 @@ if __name__ == '__main__':
     for w in db['syl2words'][1]:
         start = soundparts_left(db['sounds'][w][0])[0][0]
         end = soundparts(db['sounds'][w][0])[1][-1]
-        p = (starters.get(start, 0.5) + enders.get(end, 0.5)) / 2.0
+        p = (starters.get(start, 0.6) + enders.get(end, 0.6)) / 2.0
         if p < 0.5:
             db['meters'][w] = ['0']
             db['meterwords']['0'].add(w)

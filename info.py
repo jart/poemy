@@ -115,7 +115,7 @@ if __name__ == '__main__':
             # 6 feet - hexameter
             # 7 feet - heptameter
             try:
-                m = '01' * 5
+                m = '10' * 5
                 l1 = mkline(m, None)
                 l2 = mkline(m, l1[-1])
             except Exhausted:
@@ -156,6 +156,23 @@ if __name__ == '__main__':
             out[0] += ["(%d syllables)" % (syls)]
             for l in out:
                 print ' '.join(l)
+
+    # tells you which words from specified corpora are missing and how often
+    # they appeared
+    if sys.argv[1] == 'missing':
+        def words():
+            for corpus in sys.argv[2:]:
+                for word in poemy.corpuswords(corpus):
+                    if word not in poemy.db.cmudict:
+                        yield word
+        tbl = {}
+        for word in words():
+            tbl.setdefault(word, 0)
+            tbl[word] += 1
+        tbl = [(w, c) for w, c in tbl.iteritems()]
+        tbl.sort(key=lambda v: v[1])
+        for word, count in tbl:
+            print "%-15s %d" % (word, count)
 
     # what is the probability of each vowel being the stressed syllable?
     if sys.argv[1] == 'vowel-stress-probability':

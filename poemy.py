@@ -431,13 +431,13 @@ def corpuswords(corpus):
 
 
 def textwords(text):
-    r"""Return set of words from a blob of text"""
+    r"""Return list of words from a blob of text"""
     text = text.lower()
     text = re.sub(r"''|``", '"', text)      # latex style quotes
     text = re.sub(r"[’`]", "'", text)       # wacky apostrophes
     text = re.sub(r"[^-'a-z]", r' ', text)  # remove non-word chars
     text = re.sub(r"--+", r' ', text)       # break apart dashes
-    return set(text.split())
+    return text.split()
 
 
 db = DB()
