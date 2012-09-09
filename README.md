@@ -19,14 +19,14 @@ Why will poemy be so awesome? Because it'll be able to generate poetry from a
   ways. The rhyming algorithm considers two words as rhyming if the last vowel
   and subsequent consonant phonemes match. Poemy can also do feminine rhymes!
 
-- **Any meter**: Poemy knows which syllables are stressed in each word. Poemy
-  can also predict with good accuracy whether or not a single syllable word
-  will be stressed in a sentence. This means it can write poetry in iambic
-  pentameter, trochaic tetrameter, anapestic trimeter, etc.
+- **Any meter**: Poemy can break words into syllables and knows which ones are
+  stressed. Poemy can also predict with good accuracy whether or not a single
+  syllable word will be stressed in a sentence. This allows it to write poetry
+  in iambic pentameter, trochaic tetrameter, anapestic trimeter, etc.
 
 - **Any rhythm**. Poemy is able to distinguish between long and short sounding
-  consonants. For example: "Cat attack galore" follows the rhyming scheme
-  "sssll" (s = short, l = long).
+  consonants. For example: "Cat attack galore" follows the rhythm "sssll" (s =
+  short, l = long).
 
 - **Any style**. Poemy can be trained in various historical and contemporary
   styles. You want a Shakespearean sonnet? You got it. Some dark melancholic
@@ -35,7 +35,7 @@ Why will poemy be so awesome? Because it'll be able to generate poetry from a
 - **Alliteration**. Poemy will be able to ensure that particular or similar
   consonants are repeated. It can also repeat vowels for assonance. It can
   place these phonemes in a rigid syllable meter or use probabilistic
-  placement throughout a line.
+  placement throughout a line. It can also make tongue-twisters!
 
 What's the catch? The poems won't make any sense. But that doesn't matter
 because poetry doesn't have to make sense! But even if you impute poor poemy
@@ -47,6 +47,8 @@ plans or preparations to support other languages.
 
 ## Running
 
+    sudo make apt-get-stuff-you-need
+    make
     python load.py goth
     python info.py markov
 
