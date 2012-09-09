@@ -1,5 +1,7 @@
 import re
+import os
 import sys
+import glob
 import random
 
 import poemy
@@ -234,3 +236,59 @@ if __name__ == '__main__':
         res.sort(key=lambda v: v[0])
         for s, p, t in res:
             print "%-10s %.5f (%d)" % (s, p, t)
+
+    # generate a gexf directed graph file from the markov chains for specified
+    # corpus that Geshi can visualize
+    if sys.argv[1] == 'gexf':
+        chain = {}
+        if not sys.argv[2:]:
+            print "please specify at least one corpus"
+            sys.exit(1)
+        for corpus in sys.argv[2:]:
+            if not os.path.exists('corpora/' + corpus):
+                print "'%s' corpus not found" % (corpus)
+                sys.exit(1)
+        for corpus in sys.argv[2:]:
+            for path in glob.glob('corpora/%s/*.txt' % (corpus)):
+                data = open(path).read()
+                data = data.lower()
+                data = re.sub(r'\.', '\n', data)
+                data = re.sub(r"[^-'\n a-z]", r' ', data)
+                data = re.sub(r"([a-z])-+(\s)", r'\1\2', data)
+                data = re.sub(r"(\s)-+([a-z])", r'\1\2', data)
+                for line in data.splitlines():
+                    if not line.strip():
+                        continue
+                    try:
+                        iwords = iter(line.split())
+                        w1, w2 = iwords.next(), iwords.next()
+                        while True:
+                            w3 = iwords.next()
+                            chain.setdefault((w1, w2), {})
+                            chain[w1, w2].setdefault(w3, 0)
+                            chain[w1, w2][w3] += 1
+                            w1, w2 = w2, w3
+                    except StopIteration:
+                        pass
+        print '<?xml version="1.0" encoding="UTF-8"?>'
+        print '<gexf xmlns:viz="http:///www.gexf.net/1.1draft/viz"'
+        print '      version="1.1" xmlns="http://www.gexf.net/1.1draft">'
+        print '<graph defaultedgetype="undirected" idtype="string"'
+        print '       type="static">'
+        print '<nodes>'
+        for w1, w2 in chain:
+            print '<node id="%s" label="%s %s"/>' % (id(chain[w1, w2]), w1, w2)
+        print '</nodes>'
+        print '<edges>'
+        id_ = 0
+        for w1, w2 in chain:
+            source = id(chain[w1, w2])
+            for w3, weight in chain[w1, w2].iteritems():
+                if (w2, w3) in chain:
+                    target = id(chain[w2, w3])
+                    fmt = '<edge id="%s" source="%s" target="%s" weight="%d"/>'
+                    print fmt % (id_, source, target, weight)
+            id_ += 1
+        print '</edges>'
+        print '</graph>'
+        print '</gexf>'
