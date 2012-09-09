@@ -34,55 +34,6 @@ nasal_consonants = set('M N NG'.split())
 fricative_consonants = set('DH F S SH TH V Z ZH'.split())
 affricate_consonants = set('CH JH'.split())  # should go in stop/fricative too?
 
-lexnames = {
-    0: "adj.all",
-    1: "adj.pert",
-    2: "adv.all",
-    3: "noun.tops",
-    4: "noun.act",
-    5: "noun.animal",
-    6: "noun.artifact",
-    7: "noun.attribute",
-    8: "noun.body",
-    9: "noun.cognition",
-    10: "noun.communication",
-    11: "noun.event",
-    12: "noun.feeling",
-    13: "noun.food",
-    14: "noun.group",
-    15: "noun.location",
-    16: "noun.motive",
-    17: "noun.object",
-    18: "noun.person",
-    19: "noun.phenomenon",
-    20: "noun.plant",
-    21: "noun.possession",
-    22: "noun.process",
-    23: "noun.quantity",
-    24: "noun.relation",
-    25: "noun.shape",
-    26: "noun.state",
-    27: "noun.substance",
-    28: "noun.time",
-    29: "verb.body",
-    30: "verb.change",
-    31: "verb.cognition",
-    32: "verb.communication",
-    33: "verb.competition",
-    34: "verb.consumption",
-    35: "verb.contact",
-    36: "verb.creation",
-    37: "verb.emotion",
-    38: "verb.motion",
-    39: "verb.perception",
-    40: "verb.possession",
-    41: "verb.social",
-    42: "verb.stative",
-    43: "verb.weather",
-    44: "adj.ppl",
-}
-lexids = {v: k for k, v in lexnames.items()}
-
 stopwords = set('''
 a about above above across after afterwards again against all almost alone
 along already also although always am among amongst amoungst amount an and

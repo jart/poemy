@@ -40,30 +40,36 @@ def mkword(w1, w2, meter, rhythm, rhyme, opts):
         if not words:
             break
         w3 = words.pop(pick(words, opts))
+        if (w2, w3) in opts['visited']:
+            continue
+        opts['visited'].add((w2, w3))
         if w3 not in poemy.db.sounds:
             continue
         wcm = poemy.wordcompatmeter(meter, w3)
         if wcm is None:
             continue
-        wcr = poemy.wordcompatrhythm(rhythm, w3)
-        if wcr is None:
+        if poemy.wordcompatrhythm(rhythm, w3) is None:
             continue
         try:
             return [w3] + mkword(
-                w2, w3, meter[len(wcm):], rhythm[len(wcr):], rhyme, opts)
+                w2, w3, meter[len(wcm):], rhythm[len(wcm):], rhyme, opts)
         except Exhausted:
             pass
     raise Exhausted()
 
 
 def mkline(meter, rhythm, rhyme, **opts):
-    opts.setdefault('tries', 20)
+    opts.setdefault('tries', 100)
     opts.setdefault('originality', 1)
     opts.setdefault('bigwords', 0.9)
     opts.setdefault('feminine', False)
+    opts.setdefault('visited', set())
     words = firstwords()
     for n in xrange(opts['tries']):
         w1, w2 = words[pick(words, opts)]
+        if (w1, w2) in opts['visited']:
+            continue
+        opts['visited'].add((w1, w2))
         if w1 not in poemy.db.sounds or w2 not in poemy.db.sounds:
             continue
         if w1 in poemy.badstartwords:
@@ -71,12 +77,11 @@ def mkline(meter, rhythm, rhyme, **opts):
         wcm = poemy.wordcompatmeter(meter, w1, w2)
         if wcm is None:
             continue
-        wcr = poemy.wordcompatrhythm(rhythm, w1, w2)
-        if wcr is None:
+        if poemy.wordcompatrhythm(rhythm, w1, w2) is None:
             continue
         try:
             return [w1, w2] + mkword(
-                w1, w2, meter[len(wcm):], rhythm[len(wcr):], rhyme, opts)
+                w1, w2, meter[len(wcm):], rhythm[len(wcm):], rhyme, opts)
         except Exhausted:
             pass
     raise Exhausted()
@@ -111,21 +116,26 @@ if __name__ == '__main__':
         # for n in range(14):
         #     print ' '.join(mkline('001' * 3))
         n = 0
+        visited = set()
         while True:
-            # 01     - iambic
-            # 10     - trochaic
-            # 001    - anapestic
-            # 100    - dactylic
-            # 010    - amphibrachic
-            # 11     - a spondee foot
-            # 00     - a pyrrhic foot
-            # 1 foot - monometer
-            # 2 feet - dimeter
-            # 3 feet - trimeter
-            # 4 feet - tetrameter
-            # 5 feet - pentameter
-            # 6 feet - hexameter
-            # 7 feet - heptameter
+            # 01       - iambic
+            # 10       - trochaic
+            # 001      - anapestic
+            # 100      - dactylic
+            # 010      - amphibrachic
+            # 11       - a spondee foot
+            # 00       - a pyrrhic foot
+            # 1 foot   - monometer
+            # 2 feet   - dimeter
+            # 3 feet   - trimeter
+            # 4 feet   - tetrameter
+            # 5 feet   - pentameter
+            # 6 feet   - hexameter
+            # 7 feet   - heptameter (normally iambic and called a fourteener)
+            # 8 feet   - octameter (normally trochaic)
+            # 14 lines - quatorzain (like a sonnet)
+            # sonnet   - abab cdcd efef gg (iambic pentameter)
+            # limerick - aabba (3/4 shorter indented, anapest or amphibrach)
             try:
                 m = '0101010101'
                 r = '----------'

@@ -4,7 +4,7 @@ import bisect
 import marshal
 
 
-def similar(categories, examples, depth=2):
+def similar(categories, examples, depth=3):
     """Returns a set of similar words within a lexical category"""
     categories = set(lexids[c] for c in categories)
     similar = set()
