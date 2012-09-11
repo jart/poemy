@@ -1,2 +1,5 @@
 *.pyc
+*.so
 db.marshal
+build/
+data/wordnet/index.marshal
