@@ -4,10 +4,11 @@ import bisect
 import marshal
 
 
-def similar(categories, examples, depth=3):
+def similar(category, examples, depth=3):
     """Returns a set of similar words within a lexical category"""
-    categories = set(lexids[c] for c in categories)
-    similar = set()
+    if isinstance(category, basestring):
+        category = lexids[category]
+    res = set()
     visited = set()
     def work(word, recurse):
         if recurse == 0:
@@ -17,18 +18,18 @@ def similar(categories, examples, depth=3):
         visited.add(word)
         for lexid, wtype, words, ptrs, defin in lookup(word):
             for w in words:
-                if lexid in categories:
-                    similar.add(w)
+                if lexid == category:
+                    res.add(w)
                 work(w, recurse - 1)
             for ptype, pwtype, poffset in ptrs:
-                if pwtype not in ('~', '@', '+'):
+                if ptype not in ('&', '@'):
                     continue
                 lexid, wtype, words, ptrs, defin = lookup_offset(pwtype, poffset)
                 for w in words:
                     work(w, recurse - 1)
     for word in examples:
         work(word, depth)
-    return similar
+    return res
 
 
 def lookup(lemma, wtypes=None):
@@ -219,9 +220,9 @@ if __name__ == '__main__':
                 lexs.setdefault(lexid, 0)
                 lexs[lexid] += 1
         for lexid, score in sorted(lexs.items(), key=lambda x: x[1], reverse=True):
-            examples = list(similar([lexnames[lexid]], sys.argv[2:]))[:10]
+            examples = list(similar(lexnames[lexid], sys.argv[2:]))[:10]
             print score, lexnames[lexid], '(' + ', '.join(examples) + ')'
 
     if sys.argv[1] == 'similar':
-        for w in similar([sys.argv[2]], sys.argv[3:]):
+        for w in similar(sys.argv[2], sys.argv[3:]):
             print w
